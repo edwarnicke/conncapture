@@ -14,6 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package conncapture provides a credentials.TransportCredential wrapper that allows capturing the net.Conn
+// as the peer.Addr which can be accessed by the server using peer.FromContext
+// or the client using grpc.PeerCallOption.  Be very careful in its use, as *most* things you might do with it
+// *will* screwup your grpc.  There is at least one case (sending of file descriptors over unix file sockets out of band)
+// in which it is useful.
 package conncapture
 
 import (
@@ -27,6 +32,8 @@ type transportCredentials struct {
 	credentials.TransportCredentials
 }
 
+// TransportCredentials wraps cred (which may be nil) such that peer.Addr *is* the net.Conn and can be access by the server using peer.FromContext
+// or the client using grpc.PeerCallOption
 func TransportCredentials(cred credentials.TransportCredentials) credentials.TransportCredentials {
 	return &transportCredentials{cred}
 }

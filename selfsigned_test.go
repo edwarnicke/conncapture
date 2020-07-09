@@ -34,7 +34,6 @@ import (
 )
 
 func SelfSignedCert() (*tls.Certificate, error) {
-
 	// generate a new key-pair
 	priv, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
 	if err != nil {

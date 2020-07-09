@@ -38,8 +38,7 @@ func NewTestHealthClient(t *testing.T, client grpc_health_v1.HealthClient) grpc_
 
 func (t *testHealthClient) Check(ctx context.Context, in *grpc_health_v1.HealthCheckRequest, opts ...grpc.CallOption) (*grpc_health_v1.HealthCheckResponse, error) {
 	p := &peer.Peer{}
-	peerOpt := grpc.PeerCallOption{p}
-	rsp, err := t.client.Check(ctx, in, append(opts, peerOpt)...)
+	rsp, err := t.client.Check(ctx, in, append(opts, grpc.PeerCallOption{PeerAddr: p})...)
 	require.NoError(t, err)
 	require.NotNil(t, p)
 	require.NotNil(t, p.Addr)
@@ -53,8 +52,7 @@ func (t *testHealthClient) Check(ctx context.Context, in *grpc_health_v1.HealthC
 
 func (t *testHealthClient) Watch(ctx context.Context, in *grpc_health_v1.HealthCheckRequest, opts ...grpc.CallOption) (grpc_health_v1.Health_WatchClient, error) {
 	p := &peer.Peer{}
-	peerOpt := grpc.PeerCallOption{p}
-	watchClient, err := t.client.Watch(ctx, in, append(opts, peerOpt)...)
+	watchClient, err := t.client.Watch(ctx, in, append(opts, grpc.PeerCallOption{PeerAddr: p})...)
 	require.NoError(t, err)
 	require.NotNil(t, p)
 	require.NotNil(t, p.Addr)
