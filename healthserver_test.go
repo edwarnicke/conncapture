@@ -39,11 +39,11 @@ func (t *testHealthServer) Check(ctx context.Context, request *grpc_health_v1.He
 	require.True(t, ok)
 	require.NotNil(t, p)
 	require.NotNil(t, p.Addr)
-	require.Equal(t, p.Addr.Network(), "unix")
-	require.Equal(t, p.Addr.String(), "")
 	conn, ok := p.Addr.(net.Conn)
 	require.True(t, ok)
 	require.NotNil(t, conn)
+	require.Equal(t, p.Addr.Network(), conn.RemoteAddr().Network())
+	require.Equal(t, p.Addr.String(), conn.RemoteAddr().String())
 	return &grpc_health_v1.HealthCheckResponse{
 		Status: grpc_health_v1.HealthCheckResponse_SERVING,
 	}, nil
@@ -59,9 +59,10 @@ func (t *testHealthServer) Watch(request *grpc_health_v1.HealthCheckRequest, ser
 	conn, ok := p.Addr.(net.Conn)
 	require.True(t, ok)
 	require.NotNil(t, conn)
-	server.Send(&grpc_health_v1.HealthCheckResponse{
+	err := server.Send(&grpc_health_v1.HealthCheckResponse{
 		Status: grpc_health_v1.HealthCheckResponse_SERVING,
 	})
+	require.NoError(t, err)
 	<-server.Context().Done()
 	return nil
 }

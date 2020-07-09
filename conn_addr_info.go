@@ -24,6 +24,7 @@ type addrInfoConn struct {
 	net.Conn
 }
 
+// ConnToAddrInfo wraps conn so as to also meet the net.Addr interface
 func ConnToAddrInfo(conn net.Conn) net.Conn {
 	return &addrInfoConn{conn}
 }
