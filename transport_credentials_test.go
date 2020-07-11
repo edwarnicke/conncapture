@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"net"
 	"path/filepath"
+	"syscall"
 	"testing"
 	"time"
 
@@ -88,4 +89,30 @@ func TestConnCaptureTransportCredentials_Check_TLS(t *testing.T) {
 		Service: "foo",
 	})
 	require.NoError(t, err)
+}
+
+func TestConnToAddrInfo(t *testing.T) {
+	dir, err := ioutil.TempDir("", "")
+	require.NoError(t, err)
+	path := filepath.Join(dir, "socket")
+	listener, err := net.Listen("unix", path)
+	require.NoError(t, err)
+	defer func() { _ = listener.Close() }()
+	go func() {
+		_, _ = listener.Accept()
+	}()
+
+	conn, err := net.Dial("unix", path)
+	require.NoError(t, err)
+	require.NotNil(t, conn)
+	defer func() { _ = conn.Close() }()
+	conn = conncapture.ConnToAddrInfo(conn)
+	c, ok := conn.(interface {
+		SyscallConn() (syscall.RawConn, error)
+	})
+	require.True(t, ok)
+	require.NotNil(t, c)
+	raw, err := c.SyscallConn()
+	require.NoError(t, err)
+	require.NotNil(t, raw)
 }

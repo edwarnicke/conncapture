@@ -18,6 +18,9 @@ package conncapture
 
 import (
 	"net"
+	"syscall"
+
+	"github.com/pkg/errors"
 )
 
 type addrInfoConn struct {
@@ -29,14 +32,24 @@ func ConnToAddrInfo(conn net.Conn) net.Conn {
 	return &addrInfoConn{conn}
 }
 
-func (i *addrInfoConn) RemoteAddr() net.Addr {
-	return i
+func (a *addrInfoConn) RemoteAddr() net.Addr {
+	return a
 }
 
-func (i *addrInfoConn) Network() string {
-	return i.Conn.RemoteAddr().Network()
+func (a *addrInfoConn) Network() string {
+	return a.Conn.RemoteAddr().Network()
 }
 
-func (i *addrInfoConn) String() string {
-	return i.Conn.RemoteAddr().String()
+func (a *addrInfoConn) String() string {
+	return a.Conn.RemoteAddr().String()
+}
+
+func (a *addrInfoConn) SyscallConn() (syscall.RawConn, error) {
+	if conn, ok := a.Conn.(interface {
+		SyscallConn() (syscall.RawConn, error)
+	}); ok {
+		return conn.SyscallConn()
+	}
+
+	return nil, errors.Errorf("underlying connection lacks method SyscallConn() (syscall.RawConn, error): %+v", a.Conn)
 }
