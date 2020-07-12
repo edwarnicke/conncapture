@@ -29,22 +29,22 @@ type addrInfoConn struct {
 
 // ConnToAddrInfo wraps conn so as to also meet the net.Addr interface
 func ConnToAddrInfo(conn net.Conn) net.Conn {
-	return &addrInfoConn{conn}
+	return addrInfoConn{conn}
 }
 
-func (a *addrInfoConn) RemoteAddr() net.Addr {
+func (a addrInfoConn) RemoteAddr() net.Addr {
 	return a
 }
 
-func (a *addrInfoConn) Network() string {
+func (a addrInfoConn) Network() string {
 	return a.Conn.RemoteAddr().Network()
 }
 
-func (a *addrInfoConn) String() string {
+func (a addrInfoConn) String() string {
 	return a.Conn.RemoteAddr().String()
 }
 
-func (a *addrInfoConn) SyscallConn() (syscall.RawConn, error) {
+func (a addrInfoConn) SyscallConn() (syscall.RawConn, error) {
 	if conn, ok := a.Conn.(interface {
 		SyscallConn() (syscall.RawConn, error)
 	}); ok {
